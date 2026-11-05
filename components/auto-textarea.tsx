@@ -1,9 +1,19 @@
 "use client";
-import { useLayoutEffect, useRef, type TextareaHTMLAttributes } from "react";
-export function AutoTextarea(
-  props: TextareaHTMLAttributes<HTMLTextAreaElement>,
-) {
+import {
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+  type Ref,
+  type TextareaHTMLAttributes,
+} from "react";
+export function AutoTextarea({
+  ref: forwardedRef,
+  ...props
+}: TextareaHTMLAttributes<HTMLTextAreaElement> & {
+  ref?: Ref<HTMLTextAreaElement>;
+}) {
   const ref = useRef<HTMLTextAreaElement>(null);
+  useImperativeHandle(forwardedRef, () => ref.current!, []);
   const size = () => {
     const node = ref.current;
     if (node) {
