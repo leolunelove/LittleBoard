@@ -353,110 +353,116 @@ export function TaskEditor({
           {imageError}
         </p>
       )}
-      {details && (
-        <div className="editor-details">
-          <label className="editor-label" htmlFor={`note-${id.current}`}>
-            Short note
-          </label>
-          <textarea
-            ref={noteInput}
-            id={`note-${id.current}`}
-            aria-label="Short note"
-            placeholder="Add a short note… or paste an image"
-            value={note}
-            rows={2}
-            onChange={(event) => {
-              setNote(event.target.value);
-              setFailed(false);
-            }}
-            maxLength={400}
-            readOnly={locked}
-          />
-          <div className="editor-checklist">
-            {checklist.map((step, index) => (
-              <div className="editor-step" key={step.id}>
-                <input
-                  id={`step-${step.id}`}
-                  aria-label={`Checklist step ${index + 1}`}
-                  enterKeyHint="next"
-                  onKeyDown={(event) => {
-                    if (
-                      event.key === "Enter" &&
-                      !event.metaKey &&
-                      !event.ctrlKey &&
-                      !event.nativeEvent.isComposing
-                    ) {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      if (!locked && step.title.trim()) appendStep(step.id);
+      <div
+        className={`editor-reveal${details ? " is-open" : ""}`}
+        inert={!details}
+        aria-hidden={!details}
+      >
+        <div className="editor-reveal-clip">
+          <div className="editor-details">
+            <label className="editor-label" htmlFor={`note-${id.current}`}>
+              Short note
+            </label>
+            <textarea
+              ref={noteInput}
+              id={`note-${id.current}`}
+              aria-label="Short note"
+              placeholder="Add a short note… or paste an image"
+              value={note}
+              rows={2}
+              onChange={(event) => {
+                setNote(event.target.value);
+                setFailed(false);
+              }}
+              maxLength={400}
+              readOnly={locked}
+            />
+            <div className="editor-checklist">
+              {checklist.map((step, index) => (
+                <div className="editor-step" key={step.id}>
+                  <input
+                    id={`step-${step.id}`}
+                    aria-label={`Checklist step ${index + 1}`}
+                    enterKeyHint="next"
+                    onKeyDown={(event) => {
+                      if (
+                        event.key === "Enter" &&
+                        !event.metaKey &&
+                        !event.ctrlKey &&
+                        !event.nativeEvent.isComposing
+                      ) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        if (!locked && step.title.trim()) appendStep(step.id);
+                      }
+                    }}
+                    placeholder="What needs to happen?"
+                    value={step.title}
+                    maxLength={240}
+                    readOnly={locked}
+                    onChange={(event) => {
+                      setChecklist((current) =>
+                        current.map((item) =>
+                          item.id === step.id
+                            ? { ...item, title: event.target.value }
+                            : item,
+                        ),
+                      );
+                      setFailed(false);
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="icon-button"
+                    aria-label={`Remove checklist step ${index + 1}`}
+                    disabled={locked}
+                    onClick={() =>
+                      setChecklist((current) =>
+                        current.filter((item) => item.id !== step.id),
+                      )
                     }
-                  }}
-                  placeholder="What needs to happen?"
-                  value={step.title}
-                  maxLength={240}
-                  readOnly={locked}
-                  onChange={(event) => {
-                    setChecklist((current) =>
-                      current.map((item) =>
-                        item.id === step.id
-                          ? { ...item, title: event.target.value }
-                          : item,
-                      ),
-                    );
-                    setFailed(false);
-                  }}
-                />
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+              {checklist.length > 0 && (
                 <button
                   type="button"
-                  className="icon-button"
-                  aria-label={`Remove checklist step ${index + 1}`}
-                  disabled={locked}
-                  onClick={() =>
-                    setChecklist((current) =>
-                      current.filter((item) => item.id !== step.id),
-                    )
-                  }
+                  className="text-button"
+                  disabled={locked || checklist.length >= 20}
+                  onClick={() => appendStep()}
                 >
-                  <X size={14} />
+                  <Plus size={14} />
+                  Add step
                 </button>
-              </div>
-            ))}
-            {checklist.length > 0 && (
-              <button
-                type="button"
-                className="text-button"
-                disabled={locked || checklist.length >= 20}
-                onClick={() => appendStep()}
+              )}
+            </div>
+            <div className="editor-fields">
+              <select
+                aria-label="Item status"
+                value={status}
+                disabled={locked}
+                onChange={(event) => setStatus(event.target.value as Status)}
               >
-                <Plus size={14} />
-                Add step
-              </button>
-            )}
-          </div>
-          <div className="editor-fields">
-            <select
-              aria-label="Item status"
-              value={status}
-              disabled={locked}
-              onChange={(event) => setStatus(event.target.value as Status)}
-            >
-              <option value="pending">Pending</option>
-              <option value="waiting">Waiting</option>
-              <option value="done">Done</option>
-            </select>
-            <select
-              aria-label="Assigned to"
-              value={assigned}
-              disabled={locked}
-              onChange={(event) => setAssigned(event.target.value)}
-            >
-              <option value="">Unassigned</option>
-              <option value="me">Me</option>
-              <option value="partner">Partner</option>
-            </select>
+                <option value="pending">Pending</option>
+                <option value="waiting">Waiting</option>
+                <option value="done">Done</option>
+              </select>
+              <select
+                aria-label="Assigned to"
+                value={assigned}
+                disabled={locked}
+                onChange={(event) => setAssigned(event.target.value)}
+              >
+                <option value="">Unassigned</option>
+                <option value="me">Me</option>
+                <option value="partner">Partner</option>
+              </select>
+            </div>
           </div>
         </div>
-      )}
+      </div>
       {task && changed && !saving && !failed && (
         <p className="editor-save-hint">Unsaved changes · Enter to save</p>
       )}
