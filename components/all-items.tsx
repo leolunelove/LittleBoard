@@ -446,11 +446,13 @@ export function AllItems({
                         disabled={locked}
                         onClick={() => void leave(source.code)}
                       >
-                        {source.title}{" "}
-                        <span className="source-board-number">
-                          {source.code}
+                        <span className="source-board-name">
+                          {source.title}{" "}
+                          <span className="source-board-number">
+                            {source.code}
+                          </span>
+                          {writable ? "" : " · View only"}
                         </span>
-                        {writable ? "" : " · View only"}{" "}
                         <span aria-hidden="true">↗</span>
                       </button>
                     }
