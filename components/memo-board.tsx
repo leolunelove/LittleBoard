@@ -1,4 +1,5 @@
 "use client";
+import { AutoTextarea } from "./auto-textarea";
 import { useMenuPosition } from "./use-menu-position";
 import { CSS } from "@dnd-kit/utilities";
 import { useBoardPosition } from "./use-board-position";
@@ -779,7 +780,7 @@ export function MemoBoard({
         </div>
         <h1>
           {writable ? (
-            <input
+            <AutoTextarea
               className="board-title-input"
               aria-label="Board title"
               defaultValue={board.title}
@@ -813,7 +814,7 @@ export function MemoBoard({
           )}
         </h1>
         {writable ? (
-          <textarea
+          <AutoTextarea
             className="board-description"
             aria-label="Board description"
             placeholder="Add a short description…"
@@ -878,7 +879,7 @@ export function MemoBoard({
               title={
                 redacted
                   ? "Show redacted words"
-                  : "Redact names and sensitive words"
+                  : "Redact email addresses and phone numbers"
               }
               onClick={toggleRedaction}
             >
@@ -888,6 +889,11 @@ export function MemoBoard({
           </div>
         </div>
       </header>
+      {showArchive && (
+        <p className="archive-context">
+          Archived <span>Completed earlier</span>
+        </p>
+      )}
       <div className="view-toolbar">
         <div className="view-switch" role="group" aria-label="Board layout">
           <button
@@ -1419,6 +1425,7 @@ function Section({
     </section>
   );
 }
+const rowFocus = new Set<string>();
 export function TaskRow({
   initiallyOpen = false,
   list = false,
@@ -1484,6 +1491,18 @@ export function TaskRow({
     disabled: !writable || dragDisabled || editing,
   });
   const rowRef = useRef<HTMLDivElement | null>(null);
+  const heldFocus = useRef(false);
+  useLayoutEffect(() => {
+    const row = rowRef.current;
+    if (heldFocus.current || rowFocus.delete(task.id))
+      row
+        ?.querySelector<HTMLButtonElement>(".status-button")
+        ?.focus({ preventScroll: true });
+    return () => {
+      heldFocus.current = Boolean(row?.contains(document.activeElement));
+      if (heldFocus.current) rowFocus.add(task.id);
+    };
+  }, [task.status]);
   const previousTop = useRef<number | null>(null);
   const movement = useRef<Animation | null>(null);
   useLayoutEffect(() => {
@@ -1493,7 +1512,13 @@ export function TaskRow({
       getClientRect(row, { ignoreTransform: true }).top + window.scrollY;
     const difference =
       previousTop.current === null ? 0 : previousTop.current - top;
-    if (difference && !dragActive && !reducedMotion && row.animate) {
+    if (
+      difference &&
+      !editing &&
+      !dragActive &&
+      !reducedMotion &&
+      row.animate
+    ) {
       movement.current?.cancel();
       movement.current = row.animate(
         [
