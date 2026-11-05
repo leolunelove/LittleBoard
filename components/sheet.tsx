@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useRef, type ReactNode, type KeyboardEvent } from "react";
+let modalCount = 0;
+let pageOverflow = "";
 import { X } from "lucide-react";
 export function Sheet({
   title,
@@ -15,9 +17,40 @@ export function Sheet({
   const ref = useRef<HTMLDialogElement>(null);
   const close = useRef(onClose);
   close.current = onClose;
+  const closing = useRef(false);
+  const animation = useRef<Animation | null>(null);
+  function requestClose() {
+    if (closing.current) return;
+    const node = ref.current;
+    if (
+      !node?.animate ||
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+    ) {
+      close.current();
+      return;
+    }
+    closing.current = true;
+    animation.current = node.animate(
+      [
+        { opacity: 1, transform: "translateY(0) scale(1)" },
+        { opacity: 0, transform: "translateY(6px) scale(.99)" },
+      ],
+      { duration: 120, easing: "ease-out" },
+    );
+    animation.current.finished
+      .then(() => {
+        closing.current = false;
+        close.current();
+      })
+      .catch(() => {});
+  }
   useEffect(() => {
     const dialog = ref.current!;
     const previous = document.activeElement as HTMLElement | null;
+    if (modalCount++ === 0) {
+      pageOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+    }
     dialog.showModal();
     dialog
       .querySelector<
@@ -25,7 +58,9 @@ export function Sheet({
       >("input:not([type=checkbox]):not([type=file]), textarea")
       ?.focus({ preventScroll: true });
     return () => {
+      animation.current?.cancel();
       dialog.close();
+      if (--modalCount === 0) document.body.style.overflow = pageOverflow;
       previous?.focus({ preventScroll: true });
     };
   }, []);
@@ -40,7 +75,7 @@ export function Sheet({
       }}
       onCancel={(event) => {
         event.preventDefault();
-        close.current();
+        requestClose();
       }}
       onClick={(event) => {
         if (event.target === ref.current) {
@@ -51,7 +86,7 @@ export function Sheet({
             event.clientY < rect.top ||
             event.clientY > rect.bottom
           )
-            close.current();
+            requestClose();
         }
       }}
     >
@@ -61,7 +96,7 @@ export function Sheet({
           type="button"
           className="icon-button"
           aria-label="Close"
-          onClick={onClose}
+          onClick={requestClose}
         >
           <X size={20} />
         </button>
