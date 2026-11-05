@@ -127,6 +127,13 @@ export function MemoBoard({
   const [copyFallback, setCopyFallback] = useState<string | null>(null);
   const [copyBusy, setCopyBusy] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const searchButton = useRef<HTMLButtonElement>(null);
+  const searchInput = useRef<HTMLInputElement>(null);
+  function closeSearch() {
+    setQuery("");
+    setSearchOpen(false);
+    searchButton.current?.focus({ preventScroll: true });
+  }
   const [newChecklists, setNewChecklists] = useState<string[]>([]);
   const [pasteHint, setPasteHint] = useState(() => {
     try {
@@ -226,7 +233,7 @@ export function MemoBoard({
   useLayoutEffect(() => {
     if (dockVisible && adding) {
       dockRef.current
-        ?.querySelector<HTMLInputElement>("input")
+        ?.querySelector<HTMLTextAreaElement>(".item-title-input")
         ?.focus({ preventScroll: true });
     } else if (dockVisible && wasAdding.current) {
       addButtonRef.current?.focus({ preventScroll: true });
@@ -862,6 +869,7 @@ export function MemoBoard({
           </div>
           <div className="header-controls">
             <button
+              ref={searchButton}
               className="icon-button"
               aria-label="Search board"
               aria-expanded={searchOpen}
@@ -952,6 +960,7 @@ export function MemoBoard({
         <div className="board-search">
           <Search size={16} />
           <input
+            ref={searchInput}
             type="search"
             autoFocus
             aria-label="Find items"
@@ -960,15 +969,20 @@ export function MemoBoard({
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === "Escape") {
-                setQuery("");
-                setSearchOpen(false);
+                closeSearch();
               }
             }}
           />
           <button
             className="icon-button"
-            aria-label="Clear search"
-            onClick={() => setQuery("")}
+            aria-label={query ? "Clear search" : "Close search"}
+            onClick={() => {
+              if (!query) closeSearch();
+              else {
+                setQuery("");
+                searchInput.current?.focus({ preventScroll: true });
+              }
+            }}
           >
             <X size={15} />
           </button>
@@ -1634,6 +1648,17 @@ export function TaskRow({
               <span className="unsaved-label">Unsaved edit</span>
             )}
             {sourceLabel}
+            {task.assigned_to && task.status !== "done" && (
+              <span className="assignee task-assignee">
+                <RedactedText>
+                  {task.assigned_to === "me"
+                    ? "Owner"
+                    : task.assigned_to === "partner"
+                      ? "Partner"
+                      : task.assigned_to}
+                </RedactedText>
+              </span>
+            )}
             {list && (
               <span className={`list-status list-status-${task.status}`}>
                 {labels[task.status]}
@@ -1657,17 +1682,6 @@ export function TaskRow({
               onSave={onSave}
             />
           </div>
-          {task.assigned_to && task.status !== "done" && (
-            <span className="assignee">
-              <RedactedText>
-                {task.assigned_to === "me"
-                  ? "Owner"
-                  : task.assigned_to === "partner"
-                    ? "Partner"
-                    : task.assigned_to}
-              </RedactedText>
-            </span>
-          )}
           {writable && (
             <div
               className={`row-tools${menu ? " menu-open" : ""}`}
