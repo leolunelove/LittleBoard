@@ -879,3 +879,112 @@ html[data-theme] .add-area {
 .note-toggle {
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Let the actual work breathe, especially while editing on a phone. */
+.editor-title-line {
+  align-items: flex-start;
+}
+.editor-title-line > svg {
+  margin-top: 12px;
+}
+.editor-title-line .item-title-input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  min-height: 44px;
+  max-height: 180px;
+  padding: 10px 4px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.5;
+  resize: none;
+  overflow-y: auto;
+}
+.item-title-input::placeholder {
+  color: var(--muted);
+}
+.item-title-input:focus-visible {
+  outline-offset: 2px;
+}
+.task-copy .task-assignee {
+  align-self: flex-start;
+  margin: 0;
+  padding: 0;
+  font-size: 11px;
+  line-height: 1.6;
+  white-space: normal;
+}
+.source-board-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.source-board-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.source-board-link > [aria-hidden] {
+  flex-shrink: 0;
+}
+@media (max-width: 600px) {
+  .task-row > .row-tools {
+    position: absolute;
+    top: 8px;
+    right: 0;
+    margin: 0;
+  }
+  .task-row:has(> .row-tools) .task-title {
+    min-height: 36px;
+    padding-right: 44px;
+  }
+  .task-row:has(> .row-tools .drag-handle) .task-title {
+    padding-right: 88px;
+  }
+  .task-row.editing > .status-button {
+    display: none;
+  }
+  .task-row.editing .task-editor {
+    padding-inline: 4px;
+    width: 100%;
+  }
+  .task-checklist summary,
+  .original-request summary,
+  .list-note .text-button,
+  .editor-options .text-button,
+  .row-menu button,
+  .row-menu select {
+    min-height: 44px;
+  }
+  .row-menu select {
+    font-size: 16px;
+  }
+  .editor-fields select,
+  .all-items-filters select {
+    font-size: 16px;
+    min-height: 44px;
+  }
+  .source-board-link {
+    min-height: 44px;
+  }
+}
+@media (max-width: 480px) {
+  .all-items-filters {
+    flex-wrap: wrap;
+  }
+  .all-items-filters > label {
+    width: 100%;
+    max-width: none;
+  }
+  .all-items-filters select {
+    width: 100%;
+  }
+  .all-items-search {
+    flex-basis: 100%;
+  }
+}
