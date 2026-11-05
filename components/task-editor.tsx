@@ -4,6 +4,7 @@ import { ChevronDown, Plus, X, ImagePlus, ListChecks } from "lucide-react";
 import { compressImage, MAX_IMAGES } from "@/lib/task-images";
 import { useComposerDock } from "./use-composer-dock";
 import { TaskImages } from "./task-images";
+import { AutoTextarea } from "./auto-textarea";
 import type { Task, Status, TaskImage } from "@/lib/types";
 
 export function TaskEditor({
@@ -77,7 +78,7 @@ export function TaskEditor({
   const id = useRef(task?.id || draftId || crypto.randomUUID());
   const submitting = useRef(false);
   const cancelled = useRef(false);
-  const input = useRef<HTMLInputElement>(null);
+  const input = useRef<HTMLTextAreaElement>(null);
   const dirty = Boolean(
     title ||
     note ||
@@ -285,14 +286,15 @@ export function TaskEditor({
     >
       <div className="editor-title-line">
         {!task && <Plus size={18} aria-hidden="true" />}
-        <input
+        <AutoTextarea
           ref={input}
+          className="item-title-input"
           autoFocus
           aria-label="Item title"
           placeholder={task ? "What needs to happen?" : "Add an item…"}
           value={title}
           onChange={(event) => {
-            setTitle(event.target.value);
+            setTitle(event.target.value.replace(/[\r\n]+/g, " "));
             setFailed(false);
           }}
           maxLength={240}
