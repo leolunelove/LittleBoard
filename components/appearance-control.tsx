@@ -31,9 +31,7 @@ export function AppearanceControl() {
     media?.addEventListener("change", sync);
     window.addEventListener("storage", onStorage);
     return () => {
-      if (transitionTimer.current !== null)
-        window.clearTimeout(transitionTimer.current);
-      document.documentElement.classList.remove("theme-changing");
+      // The short global colour transition may finish after this sheet closes.
       media?.removeEventListener("change", sync);
       window.removeEventListener("storage", onStorage);
     };
