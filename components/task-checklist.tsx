@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import type { Task } from "@/lib/types";
+import { useSessionDraft } from "./use-session-draft";
 import { RedactedText } from "./redacted-text";
 export function TaskChecklist({
   task,
@@ -18,7 +19,10 @@ export function TaskChecklist({
   busy: boolean;
   onSave: (patch: Partial<Task>) => Promise<boolean>;
 }) {
-  const [open, setOpen] = useState(initiallyOpen);
+  const [open, setOpen] = useSessionDraft(
+    `memo:checklist:${task.id}`,
+    initiallyOpen,
+  );
   useEffect(() => {
     if (initiallyOpen) setOpen(true);
   }, [initiallyOpen]);
