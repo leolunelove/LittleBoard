@@ -114,6 +114,12 @@ export function ProfileSettings({ boardId }: { boardId?: string }) {
             </button>
             {notes && (
               <div className="release-notes">
+                <h3>A little more room · 5 November 2026</h3>
+                <ul>
+                  <li>Long item titles stay visible while adding and editing.</li>
+                  <li>Roomier task text and controls on smaller screens.</li>
+                  <li>Clearer search controls and a calmer All items layout.</li>
+                </ul>
                 <h3>A little more character · 4 November 2026</h3>
                 <p>
                   Clearer layers, quieter saving, coordinated details, steadier
