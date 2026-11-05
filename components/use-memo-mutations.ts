@@ -289,8 +289,17 @@ export function useMemoMutations(
         ),
       }),
     );
-    if (ok) clearUndo(entry);
-    else {
+    if (ok) {
+      clearUndo(entry);
+      window.requestAnimationFrame?.(() => {
+        const row = Array.from(
+          document.querySelectorAll<HTMLElement>("[data-task-id]"),
+        ).find((node) => node.dataset.taskId === entry.task.id);
+        row
+          ?.querySelector<HTMLButtonElement>(".status-button")
+          ?.focus({ preventScroll: true });
+      });
+    } else {
       entry.expiresAt = Date.now() + UNDO_MS;
       if (mounted.current) setUndoState({ ...entry });
       timer.current = setTimeout(() => clearUndo(entry), UNDO_MS);
