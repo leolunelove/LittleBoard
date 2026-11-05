@@ -277,7 +277,17 @@ export function LittleBoardApp() {
     return (
       <>
         <div className="board-brand-bar">
-          <span className="little-brand">{brand.props.children}</span>
+          <button
+            className="little-brand"
+            aria-label="Your boards"
+            onClick={() => {
+              document
+                .querySelector<HTMLButtonElement>(".personal-topbar button")
+                ?.click();
+            }}
+          >
+            {brand.props.children}
+          </button>
         </div>
         <MemoBoard
           key={`${board.id}:${board.claimed}:${board.invited_email}`}
