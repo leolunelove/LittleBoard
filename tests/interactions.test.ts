@@ -1902,3 +1902,18 @@ test("an open item menu gets its own layer and Close returns focus to its trigge
   assert.equal(document.querySelector(".row-menu"), null);
   assert.equal(document.activeElement, trigger);
 });
+
+test("All items returns keyboard focus to quick add when the composer closes", async () => {
+  const { AllItems } = await import("../components/all-items");
+  ui.render(
+    createElement(AllItems, {
+      initial: [{ ...initial, code: "123456", access: "owner" }],
+    }),
+  );
+  ui.fireEvent.click(ui.screen.getByRole("button", { name: "Add item" }));
+  ui.fireEvent.click(ui.screen.getByRole("button", { name: "Done adding" }));
+  assert.equal(
+    document.activeElement,
+    ui.screen.getByRole("button", { name: "Add item" }),
+  );
+});
