@@ -10,6 +10,7 @@ import { TaskRow } from "./memo-board";
 import { TaskEditor } from "./task-editor";
 import { useMemoMutations } from "./use-memo-mutations";
 import { useSessionDraft } from "./use-session-draft";
+import { useReducedMotion } from "./use-reduced-motion";
 import { useComposerDock } from "./use-composer-dock";
 import { ProfileSettings as AppearanceControl } from "./profile-settings";
 
@@ -56,6 +57,9 @@ export function AllItems({
   initial: Board[];
   initialWarning?: string;
 }) {
+  const reducedMotion = useReducedMotion();
+  const addButton = useRef<HTMLButtonElement>(null);
+  const wasAdding = useRef(false);
   const boardsRef = useRef(initial);
   const [boards, setBoards] = useState(initial);
   const [refreshError, setRefreshError] = useState(initialWarning);
@@ -80,6 +84,11 @@ export function AllItems({
     null,
   );
   const [adding, setAdding] = useState(Boolean(addDraft));
+  useEffect(() => {
+    if (wasAdding.current && !adding)
+      addButton.current?.focus({ preventScroll: true });
+    wasAdding.current = adding;
+  }, [adding]);
   const [addDirty, setAddDirty] = useState(Boolean(addDraft));
   const [destination, setDestination] = useState(addDraft?.board_id || "");
   const destinationRef = useRef(destination);
@@ -462,7 +471,7 @@ export function AllItems({
                     }
                     dragDisabled
                     dragActive={false}
-                    reducedMotion={false}
+                    reducedMotion={reducedMotion}
                     canMoveUp={false}
                     canMoveDown={false}
                     dropBefore={false}
@@ -566,6 +575,7 @@ export function AllItems({
             </>
           ) : (
             <button
+              ref={addButton}
               className="add-button"
               disabled={busy}
               onClick={() => {
