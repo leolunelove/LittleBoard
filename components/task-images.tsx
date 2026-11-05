@@ -89,6 +89,7 @@ export function TaskImages({
             }}
           >
             <img
+              key={selected.id}
               className="image-full"
               src={selected.src}
               alt={selected.name}
