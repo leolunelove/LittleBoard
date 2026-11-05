@@ -1917,3 +1917,59 @@ test("All items returns keyboard focus to quick add when the composer closes", a
     ui.screen.getByRole("button", { name: "Add item" }),
   );
 });
+
+test("wrapping item titles keep Enter-to-add, normalize pasted lines, and restore focus", async () => {
+  const saved: Partial<Task>[] = [];
+  ui.render(
+    createElement(TaskEditor, {
+      onCancel() {},
+      async onSave(patch) {
+        saved.push(patch);
+        return true;
+      },
+    }),
+  );
+  const title = ui.screen.getByRole("textbox", {
+    name: "Item title",
+  }) as HTMLTextAreaElement;
+  assert.equal(title.tagName, "TEXTAREA");
+  ui.fireEvent.change(title, {
+    target: { value: "Review the mobile layout\nand send the final preview" },
+  });
+  assert.equal(
+    title.value,
+    "Review the mobile layout and send the final preview",
+  );
+  await ui.act(async () => {
+    ui.fireEvent.keyDown(title, { key: "Enter", isComposing: true });
+  });
+  assert.equal(saved.length, 0);
+  await ui.act(async () => {
+    ui.fireEvent.keyDown(title, { key: "Enter" });
+  });
+  assert.equal(saved.length, 1);
+  assert.equal(
+    saved[0].title,
+    "Review the mobile layout and send the final preview",
+  );
+  assert.equal(title.value, "");
+  assert.equal(document.activeElement, title);
+});
+
+test("board search clears back to its input and closes back to its trigger", () => {
+  ui.render(createElement(MemoBoard, { initial, mode: "viewer" }));
+  const trigger = ui.screen.getByRole("button", { name: "Search board" });
+  ui.fireEvent.click(trigger);
+  const search = ui.screen.getByRole("searchbox", { name: "Find items" });
+  ui.fireEvent.change(search, { target: { value: "film" } });
+  ui.fireEvent.click(ui.screen.getByRole("button", { name: "Clear search" }));
+  assert.equal((search as HTMLInputElement).value, "");
+  assert.equal(document.activeElement, search);
+  ui.fireEvent.click(ui.screen.getByRole("button", { name: "Close search" }));
+  assert.equal(ui.screen.queryByRole("searchbox"), null);
+  assert.equal(document.activeElement, trigger);
+  ui.fireEvent.click(trigger);
+  ui.fireEvent.keyDown(ui.screen.getByRole("searchbox"), { key: "Escape" });
+  assert.equal(ui.screen.queryByRole("searchbox"), null);
+  assert.equal(document.activeElement, trigger);
+});
